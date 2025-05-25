@@ -1,9 +1,144 @@
-<!-- home/templates/home/index.html -->
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>Welcome</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+      height: 300px;
+    }
+
+    #signin-form h2 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    #signin-form input {
+      width: 100%;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    .button-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+}
+
+    .center-button {
+      display: flex;
+      justify-content: center;
+    }
+
+    .right-button {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 100px;
+    }
+
+    #send-btn,
+    #admin-btn {
+      width: 100px;
+      padding: 6px 12px;
+      background: #2c3e50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    #send-btn:hover,
+    #admin-btn:hover {
+      background: #34495e;
+    }
+  </style>
 </head>
 <body>
-    <h1>Hello from the Sign In page!</h1>
+  <div class="container">
+    <form id="signin-form">
+      <h2>Sign In</h2>
+        <input type="text" id="username" placeholder="Student Number" required>
+        <div class="button-wrapper">
+        <div class="center-button">
+        <button type="submit" id="send-btn">Send</button>
+        </div>
+        <div class="right-button">
+        <button type="button" id="admin-btn" onclick="checkPassword()">Admin</button>
+        </div>
+        </div>
+    </form>
+  </div>
+
+  <script>
+    // Handle form submission
+    document.getElementById("signin-form").addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const username = document.getElementById("username").value;
+
+      // Make an API call to check the student number
+      try {
+        const response = await fetch('http://localhost:3000/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ student_number: username })
+        });
+
+          const result = await response.json();
+
+        // Check if the response indicates success
+        if (result.success) {
+          window.location.href = "homepage.html";  // Redirect to homepage
+        } else {
+          alert(result.message);  // Show error message from server
+        }
+      } catch (error) {
+          console.error('Error:', error);
+          alert("There was an error connecting to the server.");
+      }
+    });
+
+    // Admin login check
+    function checkPassword() {
+      var password = prompt("Please enter the admin password:");
+      var correctPassword = "password";
+
+      if (password === correctPassword) {
+        window.location.href = "{% url 'custom_admin' %}";  // Redirect to admin page
+      } else {
+        alert("Incorrect password. Please try again.");
+      }
+    }
+  </script>
 </body>
 </html>
+
+

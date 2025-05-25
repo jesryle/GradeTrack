@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Sign In</title>
   <style>
     * {
@@ -38,9 +38,16 @@
     #signin-form input {
       width: 100%;
       padding: 0.75rem;
-      margin-bottom: 1rem;
+      margin-bottom: 0.5rem;
       border: 1px solid #ccc;
       border-radius: 8px;
+    }
+
+    #login-error {
+      color: red;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+      display: none;
     }
 
     .button-wrapper {
@@ -48,7 +55,7 @@
       flex-direction: column;
       gap: 10px;
       margin-top: 10px;
-}
+    }
 
     .center-button {
       display: flex;
@@ -58,7 +65,7 @@
     .right-button {
       display: flex;
       justify-content: flex-end;
-      margin-top: 100px;
+      margin-top: 50px;
     }
 
     #send-btn,
@@ -77,68 +84,161 @@
     #admin-btn:hover {
       background: #34495e;
     }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      left: 0;
+      top: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: #fff;
+      padding: 1.5rem;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 300px;
+      text-align: center;
+    }
+
+    .modal-content input {
+      width: 100%;
+      padding: 0.5rem;
+      margin: 1rem 0 0.5rem 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    #admin-error {
+      color: red;
+      font-size: 0.85rem;
+      display: none;
+      margin-bottom: 10px;
+    }
+
+    .modal-buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .modal-buttons button {
+      flex: 1;
+      padding: 0.5rem;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .cancel-btn {
+      background-color: #ccc;
+    }
+
+    .confirm-btn {
+      background-color: #2c3e50;
+      color: #fff;
+    }
+
+    .confirm-btn:hover {
+      background-color: #34495e;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <form id="signin-form">
       <h2>Sign In</h2>
-        <input type="text" id="username" placeholder="Student Number" required>
-        <div class="button-wrapper">
+      <input type="text" id="username" placeholder="Student Number" required />
+      <span id="login-error"></span>
+      <div class="button-wrapper">
         <div class="center-button">
-        <button type="submit" id="send-btn">Send</button>
+          <button type="submit" id="send-btn">Send</button>
         </div>
         <div class="right-button">
-        <button type="button" id="admin-btn" onclick="checkPassword()">Admin</button>
+          <button type="button" id="admin-btn">Admin</button>
         </div>
-        </div>
+      </div>
     </form>
   </div>
 
+  <!-- Admin Modal -->
+  <div id="admin-modal" class="modal">
+    <div class="modal-content">
+      <h3>Admin Login</h3>
+      <input type="password" id="admin-password" placeholder="Enter password" />
+      <span id="admin-error">Incorrect password</span>
+      <div class="modal-buttons">
+        <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+        <button class="confirm-btn" onclick="submitAdminPassword()">Enter</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // Handle form submission
-    document.getElementById("signin-form").addEventListener("submit", async function(e) {
+    // Handle student login form submission
+    document.getElementById("signin-form").addEventListener("submit", async function (e) {
       e.preventDefault();
-
       const username = document.getElementById("username").value;
+      const errorSpan = document.getElementById("login-error");
 
-      // Make an API call to check the student number
       try {
-        const response = await fetch('http://localhost:3000/login', {
-          method: 'POST',
+        const response = await fetch("http://localhost:3000/login", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify({ student_number: username })
+          body: JSON.stringify({ student_number: username }),
         });
 
-          const result = await response.json();
+        const result = await response.json();
 
-        // Check if the response indicates success
         if (result.success) {
-          window.location.href = "homepage.html";  // Redirect to homepage
+          errorSpan.style.display = "none";
+          window.location.href = "{% url 'home' %}";
         } else {
-          alert(result.message);  // Show error message from server
+          errorSpan.textContent = result.message || "Invalid student number.";
+          errorSpan.style.display = "block";
         }
       } catch (error) {
-          console.error('Error:', error);
-          alert("There was an error connecting to the server.");
+        console.error("Error:", error);
+        errorSpan.textContent = "ID number you entered doesn't exist";
+        errorSpan.style.display = "block";
       }
     });
 
-    // Admin login check
-    function checkPassword() {
-      var password = prompt("Please enter the admin password:");
-      var correctPassword = "password";
+    // Admin Modal Control
+    document.getElementById("admin-btn").addEventListener("click", () => {
+      document.getElementById("admin-modal").style.display = "flex";
+      document.getElementById("admin-password").value = "";
+      document.getElementById("admin-error").style.display = "none";
+    });
+
+    function closeModal() {
+      document.getElementById("admin-modal").style.display = "none";
+      document.getElementById("admin-error").style.display = "none";
+    }
+
+    function submitAdminPassword() {
+      const password = document.getElementById("admin-password").value;
+      const correctPassword = "password";
+      const errorSpan = document.getElementById("admin-error");
 
       if (password === correctPassword) {
-        window.location.href = "{% url 'custom_admin' %}";  // Redirect to admin page
+        errorSpan.style.display = "none";
+        window.location.href = "{% url 'custom_admin' %}";
       } else {
-        alert("Incorrect password. Please try again.");
+        errorSpan.style.display = "block";
       }
     }
+
   </script>
 </body>
 </html>
-
-

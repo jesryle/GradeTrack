@@ -169,7 +169,7 @@
     </form>
   </div>
 
-  <!-- Admin Modal -->
+  
   <div id="admin-modal" class="modal">
     <div class="modal-content">
       <h3>Admin Login</h3>
@@ -188,7 +188,7 @@
       e.preventDefault();
       const username = document.getElementById("username").value;
       const errorSpan = document.getElementById("login-error");
-
+    // Make an API call to check the student number
       try {
         const response = await fetch("http://localhost:3000/login", {
           method: "POST",
@@ -199,7 +199,7 @@
         });
 
         const result = await response.json();
-
+      // Check if the response indicates success
         if (result.success) {
           errorSpan.style.display = "none";
           window.location.href = "{% url 'home' %}";
@@ -214,8 +214,7 @@
       }
     });
 
-    // Admin Modal Control
-    document.getElementById("admin-btn").addEventListener("click", () => {
+      document.getElementById("admin-btn").addEventListener("click", () => {
       document.getElementById("admin-modal").style.display = "flex";
       document.getElementById("admin-password").value = "";
       document.getElementById("admin-error").style.display = "none";
